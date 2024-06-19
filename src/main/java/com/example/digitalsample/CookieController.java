@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CookieController {
 
     @GetMapping("/cookie")
-    public String cookie(HttpServletResponse response, @RequestParam String id, @RequestParam String password, Model model, HttpServletRequest request) {
-        log.info("이전의 쿠키 아이디 {}", request.getCookies());
+    public String cookie(HttpServletResponse response, @RequestParam String id, @RequestParam String password, Model model) {
         Cookie cookie = new Cookie(id, password);
         cookie.setMaxAge(100);
 
