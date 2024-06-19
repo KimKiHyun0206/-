@@ -1,7 +1,6 @@
 package com.example.digitalsample;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class CookieController {
 
+    //http://localhost:8080/cookie?id=10&password=23
     @GetMapping("/cookie")
     public String cookie(HttpServletResponse response, @RequestParam String id, @RequestParam String password, Model model) {
         Cookie cookie = new Cookie(id, password);
@@ -28,6 +28,7 @@ public class CookieController {
         return "cookie";
     }
 
+    //http://localhost:8080/use-cookie
     @GetMapping("/use-cookie")
     public String useCookie(@CookieValue(name = "10", required = false) String id, Model model) {
         log.info("Cookie 를 받아왔습니다 {}", id);
