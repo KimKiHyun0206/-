@@ -21,6 +21,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+
+
+    //스프링 3.0 버전에서 구동하는 JSP
+    implementation group: 'org.glassfish.web', name: 'jakarta.servlet.jsp.jstl', version: '2.0.0'
+
+    //JSP를 처리해주는 서블릿
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+
 }
 
 tasks.named('test') {
