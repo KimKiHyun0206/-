@@ -17,6 +17,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+
+    /**
+     * @param request : Header에서 토큰을 받아오기 위한 매개변수
+     * */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 헤더에서 토큰 받아오기

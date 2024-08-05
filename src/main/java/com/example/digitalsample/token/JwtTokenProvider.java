@@ -21,20 +21,29 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    private String secretKey = "webfirewood";
+    private String secretKey = "digital";
 
     private long tokenValidTime = 30 * 60 * 1000L;     // 토큰 유효시간 30분
 
     private final UserDetailsService userDetailsService;
 
-    // 객체 초기화, secretKey를 Base64로 인코딩
+    /**
+     * @PostConstruct : 객체를 초기화한다
+     *
+     * 객체롤 초기화 한 이후에 secretKey를 Base64로 인코딩한다
+     */
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // 토큰 생성
-    public String createToken(String userPk, List<String> roles) {  // userPK = email
+    /**
+     * @param userPk : 사용자테이블의 PrimaryKey
+     * @param roles  : 사용자에게 부여할 권한 목록
+     * @return token을 발행해서 리턴한다
+     * 토큰을 생성해주는 메소드이다
+     */
+    public String createToken(String userPk, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장
         Date now = new Date();
@@ -46,28 +55,66 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 인증 정보 조회
+    /**
+     * @param token : 토큰값
+     * @return 인증 정보
+     * 토큰에서 인증 정보를 조회하기 위한 메소드
+     * */
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserPk(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        UserDetails userDetails = userDetailsService
+                .loadUserByUsername(this.getUserPk(token)); //사용자의 이름으로 유저를 찾는다
+
+        //만약 찾는데 성공할 시 토큰을 만들어서 넘긴다
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                "",
+                userDetails.getAuthorities()
+        );
     }
 
-    // 토큰에서 회원 정보 추출
+    /**
+     * @param token : 토큰값
+     * @return 회원 정보
+     * 토큰에서 회원 정보를 추출하기 위한 메소드이다
+     * */
     public String getUserPk(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
-    // 토큰 유효성, 만료일자 확인
-    public boolean validateToken(String jwtToken) {
+    /**
+     * @param token : 토큰값
+     * @return 올바른 토큰인지 아닌지 리턴해준다
+     * 토큰의 유효성과 만료일자를 확인하는 메소드이다
+     * */
+    public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
-            return !claims.getBody().getExpiration().before(new Date());
+            Jws<Claims> claims =
+                    Jwts.parser()
+                    .setSigningKey(secretKey)   //시크릿 키를 설정한다
+                    .parseClaimsJws(token);     //토큰의 유효성을 확인한다
+
+            //토큰의 만료일자를 확인한다
+            return !claims.getBody()
+                    .getExpiration()
+                    .before(new Date());
+
         } catch (Exception e) {
+            //만약 위의 토큰 유효성을 검사하는 부분에서 예외가 발생(유효하지 않은 토큰임이 밝혀짐)하면 false를 리턴한다
             return false;
         }
     }
 
-    // Request의 Header에서 token 값 가져오기
+
+    /**
+     * @param request : 요청 헤더에서 token 값을 가져오기 위한 매개변수
+     * @return 헤더에서 가져온 token을 리턴해준다
+     *
+     * 헤더에서 토큰을 추출해서 리턴해주는 메소드이다
+     * */
     public String resolveToken(HttpServletRequest request) {
         return request.getHeader("X-AUTH-TOKEN");
     }
